@@ -1,0 +1,104 @@
+public class UtilityForFile {
+
+    private static String freshworks_file_location = "/home/kalyan/Downloads/testProject/mycompany.txt";
+    private static Gson gson = new Gson();
+
+    // freshworksComapny Class with two fields
+    // - Employees
+    // - CompanyName
+    private static class freshworksCompany {
+        private int employees;
+        private String companyName;
+
+        public int getEmployees() {
+            return employees;
+        }
+
+        public void setEmployees(int employees) {
+            this.employees = employees;
+        }
+
+        public String getCompanyName() {
+            return companyName;
+        }
+
+        public void setCompanyName(String companyName) {
+            this.companyName = companyName;
+        }
+
+    }
+
+    // Main Method
+    public static void main(String[] args) {
+        freshworksCompany freshworks = new freshworksCompany();
+        freshworks.setCompanyName("freshworks.com");
+        freshworks.setEmployees(4);
+
+        // Save data to file
+        freshworksWriteToFile(gson.toJson(freshworks));
+
+        // Retrieve data from file
+        freshworksReadFromFile();
+    }
+
+    // Save to file Utility
+    private static void freshworksWriteToFile(String myData) {
+        File freshworksFile = new File(freshworks_file_location);
+        if (!freshworksFile.exists()) {
+            try {
+                File directory = new File(freshworksFile.getParent());
+                if (!directory.exists()) {
+                    directory.mkdirs();
+                }
+                freshworksFile.createNewFile();
+            } catch (IOException e) {
+                log("Excepton Occured: " + e.toString());
+            }
+        }
+
+        try {
+            // Convenience class for writing character files
+            FileWriter freshworksWriter;
+            freshworksWriter = new FileWriter(freshworksFile.getAbsoluteFile(), true);
+
+            // Writes text to a character-output stream
+            BufferedWriter bufferWriter = new BufferedWriter(freshworksWriter);
+            bufferWriter.write(myData.toString());
+            bufferWriter.close();
+
+            log("Company data saved at file location: " + freshworks_file_location + " Data: " + myData + "\n");
+        } catch (IOException e) {
+            log("Hmm.. Got an error while saving Company data to file " + e.toString());
+        }
+    }
+
+    // Read From File Utility
+    public static void freshworksReadFromFile() {
+        File freshworksFile = new File(freshworks_file_location);
+        if (!freshworksFile.exists())
+            log("File doesn't exist");
+
+        InputStreamReader isReader;
+        try {
+            isReader = new InputStreamReader(new FileInputStream(freshworksFile), "UTF-8");
+
+            JsonReader myReader = new JsonReader(isReader);
+            freshworksCompany company = gson.fromJson(myReader, freshworksCompany.class);
+
+            log("Company Name: " + company.getCompanyName());
+            Integer employee = company.getEmployees();
+            log("# of Employees: " + employee.toString());
+
+        } catch (Exception e) {
+            log("error load cache from file " + e.toString());
+        }
+
+        log("\nComapny Data loaded successfully from file " + freshworks_file_location);
+
+    }
+
+    private static void log(String string) {
+        System.out.println(string);
+    }
+
+}
